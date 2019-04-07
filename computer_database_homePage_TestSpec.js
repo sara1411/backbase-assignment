@@ -2,9 +2,13 @@ var computersHomePage = require('./pageObjects/computersHomePage.js');
 var homePage = new computersHomePage(); // an instance for computersHomePage
 var addComputerPage = require('./pageObjects/addComputerPage.js');
 var addPage = new addComputerPage(); // an instance for addComputerPage
+var editOrDeleteComputerPage = require('./pageObjects/editOrDeleteComputerPage.js');
+var editPage = new editOrDeleteComputerPage(); // an instance for addComputerPage
 var computerJSONObject = require('./constants/userDefinedConstants.json'); // to maintain all constant values in a centralized location.
 var totalNumberOfFilteredComputers=0;
 var numberOfComputersFromResultSection=0;
+var lastComputerName="";
+let lastPaginationIndex=0;
 var EC=protractor.ExpectedConditions; // conditional check for visibility or presence or clickability of an element in the DOM
 
 describe('Computers Database:Smoke validation',function(){
@@ -16,49 +20,50 @@ describe('Computers Database:Smoke validation',function(){
 		browser.manage().window().maximize();
 		 
 		// 1.validation to check the url is not getting redirected to any other page
-		expect(browser.getCurrentUrl()).toBe(computerJSONObject.homePageUrl,'It is redirecting to a different page');
+		expect(browser.getCurrentUrl()).toBe(computerJSONObject.homePageUrl,'Failure Reason:It is redirecting to a different page');
 		
 		//2.validate header name is equal to "Play sample application — Computer database"
 		homePage.getHomePageHeader().getText().then(function(homePageHeaderName){
-			expect(homePageHeaderName).toBe(computerJSONObject.homePageHeaderValue,"Title value is not same as expected");
+			expect(homePageHeaderName).toBe(computerJSONObject.homePageHeaderValue,"Failure Reason:Title value is not same as expected");
 		});
 		
 		//3.previous button should be disabled initially
 		homePage.getDisabledPreviousButton().isDisplayed().then(function(isDisabled){
-			expect(isDisabled).toBe(true,"Previous button is enabled");
+			expect(isDisabled).toBe(true,"Failure Reason:Previous button is enabled");
 		});
 		
 		//4.Result section should be present on intial page load
 		homePage.getResultsSection().isDisplayed().then(function(isDisplayed){
-			expect(isDisplayed).toBe(true,"Result section is missing in home page");
+			expect(isDisplayed).toBe(true,"Failure Reason:Result section is missing in home page");
 		});
 		
 		//5. Add a new Computer button should be displayed
 		homePage.getAddNewComputerButton().isDisplayed().then(function(isDisplayed){
-			expect(isDisplayed).toBe(true,"Result section is missing in home page");
+			expect(isDisplayed).toBe(true,"Failure Reason:Result section is missing in home page");
 		});
 		
 		//6. Verify navigation to add new computer page occurs on clicking "Add a new phone button"
 		homePage.getAddNewComputerButton().click().then(function(){
-			expect(browser.getCurrentUrl()).toBe(computerJSONObject.addPageUrl,"Redirection to add computer page is failed");
+			expect(browser.getCurrentUrl()).toBe(computerJSONObject.addPageUrl,"Failure Reason:Redirection to add computer page is failed");
 			expect(addPage.getAddComputerHeaderValue().getText()).toBe("Add a computer");
 		});
 		
-		//7.Verify navigation back to home page by clicking on cancel button
+		//7.Verify navigation back to home page by clicking on cancel button in add computer page
 		addPage.getCancelButton().click().then(function(){
-			expect(browser.getCurrentUrl()).toBe(computerJSONObject.homePageUrl,'Redirection to home page is failed');
+			expect(browser.getCurrentUrl()).toBe(computerJSONObject.homePageUrl,'Failure Reason:Redirection to home page is failed');
 		});
 		
 		//8.Verify successful navigation to edit/delete computer page on clicking any computer name is database entry
-		homePage.getComputerNameFromTableByPosition(1).click().then(function(){
-			expect(browser.getCurrentUrl()).toBe(computerJSONObject.editOrDeletePageUrl,"Redirection to add computer page is failed");
-		})
+		homePage.getComputerNameFromTableByPosition(1).getAttribute('href').then(function(computerIndex){
+			homePage.getComputerNameFromTableByPosition(1).click().then(function(){
+			expect(browser.getCurrentUrl()).toBe(computerIndex,"Failure Reason:Redirection to add computer page is failed");
+			});
+		});
 		
-		
-		
-		
-		
-		
+		//9.Verify navigation back to home page by clicking on cancel button in edit ot delete computer page
+		editPage.getCancelButton().click().then(function(){
+			expect(browser.getCurrentUrl()).toBe(computerJSONObject.homePageUrl,'Failure Reason:Redirection to home page is failed');
+		});
 		
 	});
 });
@@ -102,12 +107,12 @@ describe('Computers Database:Search Functionality validation',function(){
 		
 		//6.validate previous button is disabled
 		homePage.getDisabledPreviousButton().isDisplayed().then(function(isDisabled){
-			expect(isDisabled).toBe(true,"Previous button is enabled");
+			expect(isDisabled).toBe(true,"Failure Reason:Previous button is enabled");
 		});
 		
 		//7.validate previous button is disabled
 		homePage.getDisabledNextButton().isDisplayed().then(function(isDisabled){
-			expect(isDisabled).toBe(true,"Next button is enabled");
+			expect(isDisabled).toBe(true,"Failure Reason:Next button is enabled");
 		});
 	});
 	
@@ -146,13 +151,10 @@ describe('Computers Database:Search Functionality validation',function(){
 					
 						computerNameObj.all(by.tagName('td')).get(0).getText().then(function(computerName){
 						console.log(computerName);
-						expect(computerName.toLowerCase()).toContain(computerJSONObject.validComputerNameWithMoreThanTenResults.toLowerCase(),
-						"The searched string is missing in computer name");
+						expect(computerName.toLowerCase()).toContain(computerJSONObject.validComputerNameWithMoreThanTenResults.toLowerCase());
 						
 						
-					});
-					
-					
+					});		
 				});
 				
 				//5.validate the number of results displayed in pagination section should be equal to fitered computers count
@@ -178,10 +180,99 @@ describe('Computers Database:Search Functionality validation',function(){
 			});
 			
 			}
+		});	
+	});
+	
+	it("should return 'Nothing to display',if filtered a random string which is not present in computer database", function(){
+	   
+	   let randomComputerName = Math.random().toString(36).substr(2, 10); // generates a 10 digit alphanumeric string
+	   
+	   // 1.enter the valid computer name in search field
+	   homePage.getSearchBox().clear().sendKeys(randomComputerName);
+	   
+	    // 2.click on the "Filter by Name" button
+	   homePage.getFilterByNameButton().click().then(function(){
+			console.log("Filter by Name button is clicked");
+		});
+		
+		//3.Results section message should be "No computers found"
+		homePage.getResultsSection().getText().then(function(resultSectionMessage){
+			expect(resultSectionMessage).toEqual("No computers found");
+		});
+		
+		//4.The message below the table should be "Nothing to display"
+		homePage.getNothingtoDisplay().getText().then(function(tableMessage){
+			expect(tableMessage).toEqual("Nothing to display");
+		});
+	});
+	/* Boundary testing: query p with negative number and a number greater than last pagination index*/
+	it("should validate by launching homepage url with pagination query p=-1", function(){
+	    //1. launch the home page url with pagination query p=-1(a negative number)
+		browser.get(computerJSONObject.homePageUrl+"?p=-1");
+		
+		//2. validation pagination section display result contains "Displaying 1 to 10"
+		homePage.getResultsSection().getText().then(function(resultSectionMessage){
+				var numberOfComputersFromResultSection = resultSectionMessage.split(" ")[0];
+			homePage.getPaginationCurrentSection().getText().then(function(displayedText){
+			expect(displayedText).toEqual('Displaying 1 to 10 of '+numberOfComputersFromResultSection);
+		});
+		});
+	});
+	
+	it("should validate by launching homepage url with pagination query p greater than the last pagination index", function(){
+	    
+		//1. Store the last pagination index value into variable lastPaginationIndex
+		homePage.getResultsSection().getText().then(function(resultSectionMessage){
+				var numberOfComputersFromResultSection = resultSectionMessage.split(" ")[0];
+				lastPaginationIndex = parseInt(numberOfComputersFromResultSection/10);
+			   
+			   //2. Launch the home page url with pagination query p greater than last pagination index
+				browser.get(computerJSONObject.homePageUrl+"?p="+(lastPaginationIndex+1));
+		});
+		
+		//3.The message below the table should be "Nothing to display"
+		homePage.getNothingtoDisplay().getText().then(function(tableMessage){
+			expect(tableMessage).toEqual("Nothing to display");
+		});
+		
+	});
+});
+describe('Computers Database:Sorting Functionality validation',function(){
+	it("should validate ascending and descending sorting of table by clicking on computer name header",function(){
+		//1. Launch the home page url
+		browser.get(computerJSONObject.homePageUrl);
+		
+		//2. Capture the total number of computers from the result section
+		homePage.getResultsSection().getText().then(function(resultSectionMessage){
+				var numberOfComputersFromResultSection = resultSectionMessage.split(" ")[0];
+				lastPaginationIndex = parseInt(numberOfComputersFromResultSection/10);
+			   
+			   //3. Launch the home page url with pagination query p to navigate to the last page of the table
+				browser.get(computerJSONObject.homePageUrl+"?p="+(lastPaginationIndex));
+		});
+		
+		//4. Navigate to the last page of the database table and capture the last computer name
+		homePage.getComputerNameArrayFromTable().then(function(computerNameArray){	
+				computerNameArray.forEach(function(computerNameObj, computerNameCount){
+					
+						computerNameObj.all(by.tagName('td')).get(0).getText().then(function(computerName){
+						if(computerNameCount == computerNameArray.length-1){
+							console.log(computerName);
+							//5. store the last computer name into lastComputerName variable
+							 lastComputerName= computerName;
+						}
+					});		
+				});	
+		});
+		
+		browser.get(computerJSONObject.homePageUrl);
+		//5.click on computer name link in the to sort in descending order and validate that 
+		// the table got sorted in descending alphaba numeric order.
+		homePage.getComputerNameHeaderFromTable().click().then(function(){
+			
+			expect(homePage.getComputerNameFromTableByPosition(1).getText()).toBe(lastComputerName,"sorting by computer name is not working");
 		});
 		
 		
 	});
-	
-	
 });

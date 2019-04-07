@@ -1,30 +1,26 @@
 'use strict';
 (function(){
 
-var computerHomePage = function(){
+var editOrDeleteComputerPage = function(){
 	
-	this.getHomePageHeader = function(){
-	  return element(by.css('.fill'));
+	this.getAddComputerHeaderValue = function(){
+	  return element(by.id('main')).element(by.tagName('h1'));
 	};
 	
-	this.getSearchBox = function(){
-		return element(by.id('searchbox'));
+	this.getCancelButton = function(){
+		return element(by.css('.actions')).element(by.tagName('a'));
 	};
 	
 	this.getFilterByNameButton = function(){
 		return element(by.id('searchsubmit'));
 	};
 	
-	this.getComputerNameFromTableByPosition = function(position){
-		return element(by.css('[class="computers zebra-striped"]')).element(by.tagName('tbody')).all(by.tagName('tr')).get(position-1).all(by.tagName('td')).get(0).element(by.tagName('a'));
+	this.getComputerNameFromTableByIndex = function(){
+		return element(by.css('[class="computers zebra-striped"]')).element(by.tagName('tbody')).all(by.tagName('tr')).get(0).all(by.tagName('td')).get(0);
 	};
 	
 	this.getComputerNameArrayFromTable = function(){
 		return element(by.css('[class="computers zebra-striped"]')).element(by.tagName('tbody')).all(by.tagName('tr'));
-	};
-	
-	this.getComputerNameHeaderFromTable = function(){
-		return element(by.css('[class="computers zebra-striped"]')).element(by.tagName('thead')).all(by.tagName('tr')).get(0).element(by.tagName('a'));
 	};
 	
 	this.getComputerResultsCount = function(){
@@ -63,13 +59,9 @@ var computerHomePage = function(){
 	this.getComputerDataBaseTable = function(){
 		return element('[class="computers zebra-striped"]');
 	};
-	
-	this.getNothingtoDisplay = function(){
-		return element(by.tagName('em'));
-	};
 };
 
 module.exports = function(){
-   return new computerHomePage();
+   return new editOrDeleteComputerPage();
 };
 }());
