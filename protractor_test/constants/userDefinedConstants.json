@@ -7,6 +7,7 @@
 "validComputerNameForSearch":"ASCI",
 "validComputerNameWithMoreThanTenResults":"as",
 "validIntroducedDate":"2014-11-11",
-"validDestroyedDate":"2018-11-11",
-"companyName":"Apple Inc."
+"validDiscontinuedDate":"2018-11-11",
+"companyName":"Apple Inc.",
+"errorBackgroundColor":"rgba(250, 229, 227, 1)"
 }

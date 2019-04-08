@@ -104,7 +104,7 @@ describe('Computers Database:Search Functionality validation',function(){
 				//5.validate the number of results displayed in pagination section should be equal to fitered computers count
 				homePage.getPaginationCurrentSection().getText().then(function(displayedText){
 					
-				expect(displayedText).toEqual('Displaying '+intialValue+' to '+parseInt(intialValue+computerNameArray.length-1)+' of '+numberOfComputersFromResultSection);
+				expect(displayedText).toEqual('Displaying '+intialValue+' to '+parseInt(intialValue+computerNameArray.length-1)+' of '+numberOfComputersFromResultSection,"The displaying section total results get reduced by -10 on every nextt button click");
 				
 				});
 				
@@ -158,7 +158,7 @@ describe('Computers Database:Search Functionality validation',function(){
 		homePage.getResultsSection().getText().then(function(resultSectionMessage){
 				var numberOfComputersFromResultSection = resultSectionMessage.split(" ")[0];
 			homePage.getPaginationCurrentSection().getText().then(function(displayedText){
-			expect(displayedText).toEqual('Displaying 1 to 10 of '+numberOfComputersFromResultSection);
+			expect(displayedText).toBe('Displaying 1 to 10 of '+numberOfComputersFromResultSection,"Displaying section should not contain negative value");
 		});
 		});
 	});

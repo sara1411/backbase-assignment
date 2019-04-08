@@ -19,7 +19,7 @@ var editOrDeleteComputerPage = function(){
 		return element(by.id('introduced'));
 	};
 	
-	this.getDestroyedDateField = function(){
+	this.getDiscontinuedDateField = function(){
 		return element(by.id('discontinued'));
 	};
 	
@@ -41,7 +41,20 @@ var editOrDeleteComputerPage = function(){
 	
 	this.getCompanyNameValue = function(){
 		return element(by.id('company'));
-	}
+	};
+	
+	this.computerNameSectionError = function(){
+		return element(by.css('[for="name"]')).element(by.xpath('..'))
+	};
+	
+	this.introducedDateSectionError = function(){
+		return element(by.css('[for="introduced"]')).element(by.xpath('..'))
+	};
+	
+	this.discontinuedDateSectionError = function(){
+		return element(by.css('[for="discontinued"]')).element(by.xpath('..'))
+	};
+	
 };
 
 module.exports = function(){

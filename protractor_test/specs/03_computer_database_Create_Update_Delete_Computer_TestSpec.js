@@ -8,8 +8,10 @@ var computerJSONObject = require('../constants/userDefinedConstants.json'); // t
 var totalNumberOfFilteredComputers=0;
 var numberOfComputersFromResultSection=0;
 var lastComputerName="";
-var newComputerName= "Apple Mac "+(Math.random().toString(36).substr(2, 4)); // generates a 4 digit alphanumeric string;
-var editComputerName= "Apple Mac "+(Math.random().toString(36).substr(2, 4)); // generates a 4 digit alphanumeric string;
+var newComputerName= "Apple Mac "+(Math.random().toString(36).substr(2, 4)); // generates a 4 characters of alphanumeric string;
+var editComputerName= "Apple Mac "+(Math.random().toString(36).substr(2, 4)); //generates a 4 characters of alphanumeric string;
+var valueToRepeat = 'a'
+var computerNameMoreThanThreshold= valueToRepeat.repeat(10000); // generates a 10000 digit alphanumeric string;
 var introducedDate="";
 var destroyedDate="";
 var companyNameIndex="";
@@ -17,11 +19,9 @@ let lastPaginationIndex=0;
 var EC=protractor.ExpectedConditions; // conditional check for visibility or presence or clickability of an element in the DOM
 
 describe('Computers Database:CRUD Flow validation',function(){
-	/*In this smoke test, critical functionalities of the application is tested. For an instance, verification of page load, navigation to 
-       add new computer page on clicking "Add a new computer" in home page and navigation to Edit/Delete a computer page on clicking any computer name 
-	   in home page is validated here*/
+	//In this functional test, creation, updation and deletion of a computer entry and its impact on other functionalities is covered
 	it('should validate add a computer flow',function(){
-		//1. Launch the browser URL
+		//1. Launch the home page URL
 		browser.get(computerJSONObject.homePageUrl);
 		browser.manage().window().maximize();
 		 
@@ -44,7 +44,7 @@ describe('Computers Database:CRUD Flow validation',function(){
 		 
 		addPage.getComputerNameField().sendKeys(newComputerName);
 		addPage.getIntroducedDateField().sendKeys(computerJSONObject.validIntroducedDate);
-		addPage.getDestroyedDateField().sendKeys(computerJSONObject.validDestroyedDate);
+		addPage.getDiscontinuedDateField().sendKeys(computerJSONObject.validDiscontinuedDate);
 		addPage.selectAllCompany().then(function(AllCompanies){
 			AllCompanies.forEach(function(companyName,companyCounter){
 				companyName.getText().then(function(companyNameValue){
@@ -54,7 +54,7 @@ describe('Computers Database:CRUD Flow validation',function(){
 				});
 			});
 		});
-		addPage.getDestroyedDateField().getText().then(function(){
+		addPage.getDiscontinuedDateField().getText().then(function(){
 			addPage.selectACompany(companyNameIndex).click().then(function(){
 				console.log("Company Name is selected");
 					
@@ -96,7 +96,7 @@ describe('Computers Database:CRUD Flow validation',function(){
 				});
 				computerNameObj.all(by.tagName('td')).get(2).getText().then(function(destroyedDate){
 					console.log(destroyedDate);
-					expect(destroyedDate).toContain(convertDateFormat(computerJSONObject.validDestroyedDate));
+					expect(destroyedDate).toContain(convertDateFormat(computerJSONObject.validDiscontinuedDate));
 				});
 				computerNameObj.all(by.tagName('td')).get(3).getText().then(function(companyName){
 					console.log(destroyedDate);
@@ -149,8 +149,8 @@ describe('Computers Database:CRUD Flow validation',function(){
 		editPage.getIntroducedDateField().getAttribute('value').then(function(editIntroducedDateField){
 			expect(editIntroducedDateField).toBe(computerJSONObject.validIntroducedDate);
 		});
-		editPage.getDestroyedDateField().getAttribute('value').then(function(editDestroyedDateField){
-			expect(editDestroyedDateField).toBe(computerJSONObject.validDestroyedDate);
+		editPage.getDiscontinuedDateField().getAttribute('value').then(function(editDiscontinuedDateField){
+			expect(editDiscontinuedDateField).toBe(computerJSONObject.validDiscontinuedDate);
 		});
 		editPage.getCompanyNameValue().getAttribute('value').then(function(editCompanyName){
 			expect(editCompanyName).toBe(companyNameIndex.toString());
@@ -192,7 +192,7 @@ describe('Computers Database:CRUD Flow validation',function(){
 				});
 				computerNameObj.all(by.tagName('td')).get(2).getText().then(function(destroyedDate){
 					console.log(destroyedDate);
-					expect(destroyedDate).toContain(convertDateFormat(computerJSONObject.validDestroyedDate));
+					expect(destroyedDate).toContain(convertDateFormat(computerJSONObject.validDiscontinuedDate));
 				});
 				computerNameObj.all(by.tagName('td')).get(3).getText().then(function(companyName){
 					console.log(destroyedDate);
@@ -261,6 +261,280 @@ describe('Computers Database:CRUD Flow validation',function(){
 		//7.The message below the table should be "Nothing to display"
 		homePage.getNothingtoDisplay().getText().then(function(tableMessage){
 			expect(tableMessage).toEqual("Nothing to display");
+		});
+		
+	});
+
+});
+
+describe('Computers Database: Edge cases of CRUD Flow', function(){
+	
+	it('should validate that the error should be thrown if computer name field is left empty while clicking on create this computer button',function(){
+		//1. Launch the home page URL
+		browser.get(computerJSONObject.homePageUrl);
+		
+		//2. Verify navigation to add new computer page occurs on clicking "Add a new phone button"
+		homePage.getAddNewComputerButton().click().then(function(){
+			expect(browser.getCurrentUrl()).toBe(computerJSONObject.addPageUrl,"Failure Reason:Redirection to add computer page is failed");
+			expect(addPage.getAddComputerHeaderValue().getText()).toBe("Add a computer");
+		});
+		
+		//3. Enter the valid introducedDate, destroyedDate and select company name by leaving computer name field empty
+		addPage.getIntroducedDateField().sendKeys(computerJSONObject.validIntroducedDate);
+		addPage.getDiscontinuedDateField().sendKeys(computerJSONObject.validDiscontinuedDate);
+		addPage.selectAllCompany().then(function(AllCompanies){
+			AllCompanies.forEach(function(companyName,companyCounter){
+				companyName.getText().then(function(companyNameValue){
+					if(companyNameValue === computerJSONObject.companyName){
+						companyNameIndex=companyCounter;
+					}
+				});
+			});
+		});
+		addPage.getDiscontinuedDateField().getText().then(function(){
+			addPage.selectACompany(companyNameIndex).click().then(function(){
+				console.log("Company Name is selected");
+				
+					
+			});
+		});
+		
+		//4.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+		//5. Computer field section should be highlighted with red background
+		editPage.computerNameSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			editPage.computerNameSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+	});
+	
+	it('should validate that the error should be thrown if date format other than yyyy-MM-dd is entered and add this computer button is clicked',function(){
+	  //1. enter a valid computer name
+	  addPage.getComputerNameField().sendKeys(newComputerName);
+	  
+	  //2. enter an invalid introduce date as "1999/12/12"
+	  addPage.getIntroducedDateField().clear().sendKeys("1999/12/12");
+	  
+	  //3.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	  //4. Introduced date section should be highlighted with red background
+		addPage.introducedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.introducedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+	  //5.enter an invalid introduce date as "12 December 1999"
+		addPage.getIntroducedDateField().clear().sendKeys("12 December 1999");
+	  
+	  //6.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	  //7. Introduced date section should be highlighted with red background
+		addPage.introducedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.introducedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+	   //7.enter an invalid introduce date as "1999.12.12"
+		addPage.getIntroducedDateField().clear().sendKeys("1999.12.12");
+	  
+	   //8.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	   //9.Introduced date section should be highlighted with red background
+		addPage.introducedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.introducedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+	   //10.enter an invalid introduce date as "12* 12* 1999"
+		addPage.getIntroducedDateField().clear().sendKeys("12* 12* 1999");
+	  
+	   //11.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	   //12.Introduced date section should be highlighted with red background
+		addPage.introducedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.introducedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+			  //13. enter an invalid discontinue date as "1999-31-12"
+	  addPage.getDiscontinuedDateField().clear().sendKeys("1999-31-12");
+	  
+	  //14.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	  //15. Introduced date section should be highlighted with red background
+		addPage.discontinuedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.discontinuedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+	  //16.enter an invalid discontinue date as "12 Dec 1999"
+		addPage.getDiscontinuedDateField().clear().sendKeys("12 Dec 1999");
+	  
+	  //17.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	  //18. Introduced date section should be highlighted with red background
+		addPage.discontinuedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.discontinuedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+	   //19.enter an invalid discontinue date as "12/12/1999"
+		addPage.getDiscontinuedDateField().clear().sendKeys("12/12/1999");
+	  
+	   //20.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	   //21.Introduced date section should be highlighted with red background
+		addPage.discontinuedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.discontinuedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+	   //22.enter an invalid discontinue date as "1999 Dec 12"
+		addPage.getDiscontinuedDateField().clear().sendKeys("1999 Dec 12");
+	  
+	   //23.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	   //24.Introduced date section should be highlighted with red background
+		addPage.discontinuedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.discontinuedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+		//25.enter an invalid year with Feb 29 in introduce date as "1999 Dec 12"
+		addPage.getIntroducedDateField().clear().sendKeys("1999-02-29");
+		//26.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	   //27.Introduced date section should be highlighted with red background
+		addPage.introducedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.discontinuedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+		//28.enter an invalid year with Feb 29 in introduce date as "1999 Dec 12"
+		addPage.getDiscontinuedDateField().clear().sendKeys("1999-02-29");
+		//23.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		
+	   //29.Introduced date section should be highlighted with red background
+		addPage.discontinuedDateSectionError().isDisplayed().then(function(isError){
+			expect(isError).toBe(true,"The computer name field is not highlighted with red color");
+			addPage.discontinuedDateSectionError().getCssValue('background-color').then(function(backgroundColor){
+				expect(backgroundColor).toBe(computerJSONObject.errorBackgroundColor,"The computer name field is not highlighted with red color");
+			});
+		});
+		
+		//30.enter an valid year with Feb 29 in introduce date as "2000 Dec 12"
+		addPage.getIntroducedDateField().clear().sendKeys("2000-02-29");
+		//31.enter an invalid year with Feb 29 in introduce date as "1999 Dec 12"
+		addPage.getDiscontinuedDateField().clear().sendKeys("2000-02-29");
+		
+		//32.enter computer name with more than 10000 character
+		addPage.getComputerNameField().clear().sendKeys(newComputerName);
+		
+		//33.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		browser.sleep(5000);
+		
+		//34. Validate message notification for new computer entry creation
+		homePage.getAlertMessageWarning().getText().then(function(alertMessageWarning){
+			expect(alertMessageWarning).toBe("Done! Computer "+newComputerName+" has been created");
+		});
+		
+		//35. Verify navigation to add new computer page occurs on clicking "Add a new phone button"
+		homePage.getAddNewComputerButton().click().then(function(){
+			expect(browser.getCurrentUrl()).toBe(computerJSONObject.addPageUrl,"Failure Reason:Redirection to add computer page is failed");
+			expect(addPage.getAddComputerHeaderValue().getText()).toBe("Add a computer");
+		});
+		
+		//36. Enter the valid introducedDate, destroyedDate and select company name by leaving computer name field empty
+		addPage.getComputerNameField().clear().sendKeys(newComputerName);
+		
+		//37. enter the introduced date value which is greater than discontinued data value
+		addPage.getIntroducedDateField().sendKeys("2020-02-29");
+		addPage.getDiscontinuedDateField().sendKeys("2000-02-29");
+		
+		//38. enter a valid company name
+		addPage.selectAllCompany().then(function(AllCompanies){
+			AllCompanies.forEach(function(companyName,companyCounter){
+				companyName.getText().then(function(companyNameValue){
+					if(companyNameValue === computerJSONObject.companyName){
+						companyNameIndex=companyCounter;
+					}
+				});
+			});
+		});
+		addPage.getDiscontinuedDateField().getText().then(function(){
+			addPage.selectACompany(companyNameIndex).click().then(function(){
+				console.log("Company Name is selected");
+				
+					
+			});
+		});
+		
+		//39.Click on create this computer button
+		addPage.getCreateThisComputerButton().click().then(function(){
+			console.log("create this computer button is clicked");
+		});
+		browser.sleep(5000);
+		
+		//34. Validate that no message notifcation should be present as introduced date is greater than discontinued data
+		homePage.getAlertMessageWarning().getText().then(function(alertMessageWarning){
+			expect(alertMessageWarning).not.toBe("Done! Computer "+newComputerName+" has been created","No message notifcation should be present as introduced date is greater than discontinued data");
 		});
 		
 	});
