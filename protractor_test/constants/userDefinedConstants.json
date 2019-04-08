@@ -1,0 +1,12 @@
+{
+"homePageUrl":"http://computer-database.herokuapp.com/computers",
+"addPageUrl":"http://computer-database.herokuapp.com/computers/new",
+"appDomainURL":"http://computer-database.herokuapp.com/",
+"homePageHeaderValue":"Play sample application — Computer database",
+"totalNumberOfComputers":547,
+"validComputerNameForSearch":"ASCI",
+"validComputerNameWithMoreThanTenResults":"as",
+"validIntroducedDate":"2014-11-11",
+"validDestroyedDate":"2018-11-11",
+"companyName":"Apple Inc."
+}
