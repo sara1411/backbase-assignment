@@ -1,0 +1,23 @@
+{
+  "name": "backbase_assignment",
+  "version": "1.0.0",
+  "description": "this protractor test is to perform smoke and functional testing of computers database web application",
+  "main": "index.js",
+  "dependencies": {
+    "jasmine": "^2.0.0",
+	"protractor":"^5.0.0"
+  },
+  "scripts": {
+	"start":"webdriver-manager start",
+	"update":"webdriver-manager update",
+	"test":"protractor e2eConfig.js",
+	"smoke-test":"protractor e2eConfig.js"
+  },
+  "keywords": [
+    "computers_database",
+    "package",
+    "backbase_assignment",
+    "protractor"
+  ],
+  "author": "saravanakannan"
+}
